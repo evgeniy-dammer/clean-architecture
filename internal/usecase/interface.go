@@ -1,4 +1,3 @@
 package usecase
 
-type Adapter interface {
-}
+type Adapter interface{}

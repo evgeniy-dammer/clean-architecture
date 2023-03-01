@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/evgeniy-dammer/clean-architecture/pkg/store/postgres"
 )
 

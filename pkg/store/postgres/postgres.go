@@ -3,11 +3,12 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
-	"strings"
-	"time"
 )
 
 // Store is a system store
