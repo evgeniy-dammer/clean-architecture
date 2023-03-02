@@ -10,7 +10,7 @@ import (
 	"github.com/evgeniy-dammer/clean-architecture/internal/domain/contact/surname"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/email"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/gender"
-	"github.com/evgeniy-dammer/clean-architecture/pkg/type/phoneNumber"
+	"github.com/evgeniy-dammer/clean-architecture/pkg/type/phone"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
@@ -18,23 +18,23 @@ import (
 var ErrPhoneNumberRequired = errors.New("phone number is required")
 
 type Contact struct {
-	id          uuid.UUID
-	createdAt   time.Time
-	modifiedAt  time.Time
-	phoneNumber phoneNumber.PhoneNumber
-	email       email.Email
-	name        name.Name
-	surname     surname.Surname
-	patronymic  patronymic.Patronymic
-	age         age.Age
-	gender      gender.Gender
+	id         uuid.UUID
+	createdAt  time.Time
+	modifiedAt time.Time
+	phone      phone.Phone
+	email      email.Email
+	name       name.Name
+	surname    surname.Surname
+	patronymic patronymic.Patronymic
+	age        age.Age
+	gender     gender.Gender
 }
 
 func NewWithID(
 	id uuid.UUID,
 	createdAt time.Time,
 	modifiedAt time.Time,
-	phoneNumber phoneNumber.PhoneNumber,
+	phone phone.Phone,
 	email email.Email,
 	name name.Name,
 	surname surname.Surname,
@@ -42,7 +42,7 @@ func NewWithID(
 	age age.Age,
 	gender gender.Gender,
 ) (*Contact, error) {
-	if phoneNumber.IsEmpty() {
+	if phone.IsEmpty() {
 		return nil, ErrPhoneNumberRequired
 	}
 
@@ -51,21 +51,21 @@ func NewWithID(
 	}
 
 	return &Contact{
-		id:          id,
-		createdAt:   createdAt.UTC(),
-		modifiedAt:  modifiedAt.UTC(),
-		phoneNumber: phoneNumber,
-		email:       email,
-		name:        name,
-		surname:     surname,
-		patronymic:  patronymic,
-		age:         age,
-		gender:      gender,
+		id:         id,
+		createdAt:  createdAt.UTC(),
+		modifiedAt: modifiedAt.UTC(),
+		phone:      phone,
+		email:      email,
+		name:       name,
+		surname:    surname,
+		patronymic: patronymic,
+		age:        age,
+		gender:     gender,
 	}, nil
 }
 
 func New(
-	phoneNumber phoneNumber.PhoneNumber,
+	phone phone.Phone,
 	email email.Email,
 	name name.Name,
 	surname surname.Surname,
@@ -73,23 +73,23 @@ func New(
 	age age.Age,
 	gender gender.Gender,
 ) (*Contact, error) {
-	if phoneNumber.IsEmpty() {
+	if phone.IsEmpty() {
 		return nil, ErrPhoneNumberRequired
 	}
 
 	timeNow := time.Now().UTC()
 
 	return &Contact{
-		id:          uuid.New(),
-		createdAt:   timeNow,
-		modifiedAt:  timeNow,
-		phoneNumber: phoneNumber,
-		email:       email,
-		name:        name,
-		surname:     surname,
-		patronymic:  patronymic,
-		age:         age,
-		gender:      gender,
+		id:         uuid.New(),
+		createdAt:  timeNow,
+		modifiedAt: timeNow,
+		phone:      phone,
+		email:      email,
+		name:       name,
+		surname:    surname,
+		patronymic: patronymic,
+		age:        age,
+		gender:     gender,
 	}, nil
 }
 
@@ -109,8 +109,8 @@ func (c *Contact) Email() email.Email {
 	return c.email
 }
 
-func (c *Contact) PhoneNumber() phoneNumber.PhoneNumber {
-	return c.phoneNumber
+func (c *Contact) PhoneNumber() phone.Phone {
+	return c.phone
 }
 
 func (c *Contact) Name() name.Name {

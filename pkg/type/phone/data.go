@@ -1,4 +1,4 @@
-package phoneNumber
+package phone
 
 func getNumbers(input string) string {
 	var number string
