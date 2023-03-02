@@ -18,7 +18,6 @@ import (
 var ErrPhoneNumberRequired = errors.New("phone number is required")
 
 type Contact struct {
-	id         uuid.UUID
 	createdAt  time.Time
 	modifiedAt time.Time
 	phone      phone.Phone
@@ -26,6 +25,7 @@ type Contact struct {
 	name       name.Name
 	surname    surname.Surname
 	patronymic patronymic.Patronymic
+	id         uuid.UUID
 	age        age.Age
 	gender     gender.Gender
 }

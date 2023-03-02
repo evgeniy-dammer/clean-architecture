@@ -10,4 +10,7 @@ clean:
 	rm -f clean-architecture
 
 lint:
-	gofumpt -w . && gci write --skip-generated -s standard,default . && fieldalignment -fix ./internal/model && golangci-lint run
+	gofumpt -w . && gci write --skip-generated -s standard,default . &&  golangci-lint run
+
+alignment:
+	fieldalignment -fix ./internal/domain/group

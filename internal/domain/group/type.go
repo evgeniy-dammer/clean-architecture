@@ -9,15 +9,22 @@ import (
 )
 
 type Group struct {
-	id           uuid.UUID
 	createdAt    time.Time
 	modifiedAt   time.Time
 	name         name.Name
 	description  description.Description
 	contactCount uint64
+	id           uuid.UUID
 }
 
-func NewWithID(id uuid.UUID, createdAt time.Time, modifiedAt time.Time, name name.Name, description description.Description, contactCount uint64) *Group {
+func NewWithID(
+	id uuid.UUID,
+	createdAt time.Time,
+	modifiedAt time.Time,
+	name name.Name,
+	description description.Description,
+	contactCount uint64,
+) *Group {
 	return &Group{
 		id:           id,
 		createdAt:    createdAt.UTC(),
@@ -30,12 +37,14 @@ func NewWithID(id uuid.UUID, createdAt time.Time, modifiedAt time.Time, name nam
 
 func New(name name.Name, description description.Description) *Group {
 	timeNow := time.Now().UTC()
+
 	return &Group{
-		id:          uuid.New(),
-		name:        name,
-		description: description,
-		createdAt:   timeNow,
-		modifiedAt:  timeNow,
+		id:           uuid.New(),
+		name:         name,
+		description:  description,
+		createdAt:    timeNow,
+		modifiedAt:   timeNow,
+		contactCount: 0,
 	}
 }
 
