@@ -1,6 +1,6 @@
 package sort
 
-import "github.com/evgeniy-dammer/clean-architecture/pkg/type/columnCode"
+import "github.com/evgeniy-dammer/clean-architecture/pkg/type/columncode"
 
 const (
 	DirectionAsc  Direction = "ASC"
@@ -8,7 +8,7 @@ const (
 )
 
 type Sort struct {
-	Key columnCode.ColumnCode
+	Key columncode.ColumnCode
 	Direction
 }
 
@@ -18,7 +18,7 @@ func (d Direction) String() string {
 	return string(d)
 }
 
-func (s Sort) Parsing(mapping map[columnCode.ColumnCode]string) string {
+func (s Sort) Parsing(mapping map[columncode.ColumnCode]string) string {
 	column, ok := mapping[s.Key]
 	if !ok {
 		return ""
@@ -29,7 +29,7 @@ func (s Sort) Parsing(mapping map[columnCode.ColumnCode]string) string {
 
 type Sorts []*Sort
 
-func (s Sorts) Parsing(mapping map[columnCode.ColumnCode]string) []string {
+func (s Sorts) Parsing(mapping map[columncode.ColumnCode]string) []string {
 	result := make([]string, len(mapping))
 
 	for i, sort := range s {

@@ -1,4 +1,4 @@
-package columnCode
+package columncode
 
 type ColumnCode string
 
