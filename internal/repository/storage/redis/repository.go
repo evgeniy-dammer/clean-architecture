@@ -1,15 +1,20 @@
 package redis
 
-import "github.com/evgeniy-dammer/clean-architecture/internal/usecase/adapters/storage"
+import (
+	"github.com/go-redis/cache/v8"
+)
 
 type Repository struct {
 	options Options
+	cache   *cache.Cache
 }
 
 type Options struct{}
 
-func New(storage storage.Storage, options Options) *Repository {
-	r := &Repository{}
+func New(cache *cache.Cache, options Options) *Repository {
+	r := &Repository{
+		cache: cache,
+	}
 
 	r.SetOptions(options)
 

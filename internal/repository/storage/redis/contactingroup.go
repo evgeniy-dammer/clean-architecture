@@ -13,6 +13,6 @@ func (r *Repository) DeleteContactFromGroup(groupID, contactID uuid.UUID) error 
 	panic("implement me")
 }
 
-func (r *Repository) AddContactsToGroup(groupID uuid.UUID, contactIDs ...uuid.UUID) error {
+func (r *Repository) AddContactToGroup(groupID uuid.UUID, contactIDs ...uuid.UUID) error {
 	panic("implement me")
 }

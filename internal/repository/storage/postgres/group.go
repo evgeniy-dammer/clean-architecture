@@ -18,14 +18,14 @@ func (r *Repository) DeleteGroup(groupID uuid.UUID) error {
 	panic("implement me")
 }
 
-func (r *Repository) ListGroup(parameter queryparameter.QueryParameter) ([]*group.Group, error) {
+func (r *Repository) GetListGroup(parameter queryparameter.QueryParameter) ([]*group.Group, error) {
 	panic("implement me")
 }
 
-func (r *Repository) ReadGroupByID(groupID uuid.UUID) (*group.Group, error) {
+func (r *Repository) GetGroupByID(groupID uuid.UUID) (*group.Group, error) {
 	panic("implement me")
 }
 
-func (r *Repository) CountGroup() (uint64, error) {
+func (r *Repository) CountGroup(parameter queryparameter.QueryParameter) (uint64, error) {
 	panic("implement me")
 }

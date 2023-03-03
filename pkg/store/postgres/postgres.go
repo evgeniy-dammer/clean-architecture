@@ -57,8 +57,8 @@ func (c *DBConfig) toDSN() string {
 	return strings.Join(args, " ")
 }
 
-// NewPostgres return a new Store
-func NewPostgres(cfg DBConfig) (*Store, error) {
+// New return a new Store
+func New(cfg DBConfig) (*Store, error) {
 	config, err := pgxpool.ParseConfig(cfg.toDSN())
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -71,6 +71,7 @@ func NewPostgres(cfg DBConfig) (*Store, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
+
 	if err = conn.Ping(ctx); err != nil {
 		return nil, errors.WithStack(err)
 	}

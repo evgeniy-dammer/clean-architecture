@@ -6,26 +6,26 @@ import (
 	"github.com/google/uuid"
 )
 
-func (uc *UseCase) Create(contacts ...*contact.Contact) ([]*contact.Contact, error) {
+func (uc *UseCase) CreateContact(contacts ...*contact.Contact) ([]*contact.Contact, error) {
 	panic("implement me")
 }
 
-func (uc *UseCase) Update(contactUpdate contact.Contact) (*contact.Contact, error) {
+func (uc *UseCase) UpdateContact(contactUpdate *contact.Contact) (*contact.Contact, error) {
 	panic("implement me")
 }
 
-func (uc *UseCase) Delete(contactID uuid.UUID) error {
+func (uc *UseCase) DeleteContact(contactID uuid.UUID) error {
 	panic("implement me")
 }
 
-func (uc *UseCase) List(parameter queryparameter.QueryParameter) ([]*contact.Contact, error) {
+func (uc *UseCase) GetListContact(parameter queryparameter.QueryParameter) ([]*contact.Contact, error) {
 	panic("implement me")
 }
 
-func (uc *UseCase) ReadByID(contactID uuid.UUID) (response *contact.Contact, err error) {
+func (uc *UseCase) GetContactByID(contactID uuid.UUID) (response *contact.Contact, err error) {
 	panic("implement me")
 }
 
-func (uc *UseCase) Count() (uint64, error) {
+func (uc *UseCase) CountContact(parameter queryparameter.QueryParameter) (uint64, error) {
 	panic("implement me")
 }

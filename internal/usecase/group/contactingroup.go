@@ -9,7 +9,7 @@ func (uc *UseCase) CreateContactIntoGroup(groupID uuid.UUID, contacts ...*contac
 	panic("implement me")
 }
 
-func (uc *UseCase) AddContactToGroup(groupID, contactID uuid.UUID) error {
+func (uc *UseCase) AddContactToGroup(groupID uuid.UUID, contactIDs ...uuid.UUID) error {
 	panic("implement me")
 }
 

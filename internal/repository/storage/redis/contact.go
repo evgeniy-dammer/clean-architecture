@@ -10,7 +10,7 @@ func (r *Repository) CreateContact(contacts ...*contact.Contact) ([]*contact.Con
 	panic("implement me")
 }
 
-func (r *Repository) UpdateContact(contactID, updateFn func(c *contact.Contact) (*contact.Contact, error)) (*contact.Contact, error) {
+func (r *Repository) UpdateContact(contactID uuid.UUID, updateFn func(c *contact.Contact) (*contact.Contact, error)) (*contact.Contact, error) {
 	panic("implement me")
 }
 
@@ -18,11 +18,11 @@ func (r *Repository) DeleteContact(contactID uuid.UUID) error {
 	panic("implement me")
 }
 
-func (r *Repository) ListContact(parameter queryparameter.QueryParameter) ([]*contact.Contact, error) {
+func (r *Repository) GetListContact(parameter queryparameter.QueryParameter) ([]*contact.Contact, error) {
 	panic("implement me")
 }
 
-func (r *Repository) ReadContactByID(contactID uuid.UUID) (response *contact.Contact, err error) {
+func (r *Repository) GetContactByID(contactID uuid.UUID) (response *contact.Contact, err error) {
 	panic("implement me")
 }
 
