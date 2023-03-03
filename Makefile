@@ -13,4 +13,5 @@ lint:
 	gofumpt -w . && gci write --skip-generated -s standard,default . &&  golangci-lint run
 
 alignment:
-	fieldalignment -fix ./internal/domain/group
+	fieldalignment -fix ./internal/delivery/grpc
+

@@ -9,35 +9,35 @@ import (
 
 type Contact interface {
 	Create(contacts ...*contact.Contact) ([]*contact.Contact, error)
-	Update(contact *contact.Contact) (*contact.Contact, error)
-	Delete(contactID uuid.UUID) error
+	Update(contactUpdate contact.Contact) (*contact.Contact, error)
+	Delete(ID uuid.UUID /*Тут можно передавать фильтр*/) error
 
 	ContactReader
 }
 
 type ContactReader interface {
-	GetList(parameter queryparameter.QueryParameter) ([]*contact.Contact, error)
-	GetByID(contactID uuid.UUID) (*contact.Contact, error)
-	Count(parameter queryparameter.QueryParameter) (uint64, error)
+	List(parameter queryparameter.QueryParameter) ([]*contact.Contact, error)
+	ReadByID(ID uuid.UUID) (response *contact.Contact, err error)
+	Count( /*Тут можно передавать фильтр*/ ) (uint64, error)
 }
 
 type Group interface {
-	Create(group *group.Group) (*group.Group, error)
-	Update(group *group.Group) (*group.Group, error)
-	Delete(groupID uuid.UUID) error
+	Create(groupCreate *group.Group) (*group.Group, error)
+	Update(groupUpdate *group.Group) (*group.Group, error)
+	Delete(ID uuid.UUID /*Тут можно передавать фильтр*/) error
 
 	GroupReader
 	ContactInGroup
 }
 
 type GroupReader interface {
-	GetList(parameter queryparameter.QueryParameter) ([]*group.Group, error)
-	GetByID(groupID uuid.UUID) (*group.Group, error)
-	Count(parameter queryparameter.QueryParameter) (uint64, error)
+	List(parameter queryparameter.QueryParameter) ([]*group.Group, error)
+	ReadByID(ID uuid.UUID) (*group.Group, error)
+	Count( /*Тут можно передавать фильтр*/ ) (uint64, error)
 }
 
 type ContactInGroup interface {
-	CreateContactInGroup(groupID uuid.UUID, contacts ...*contact.Contact) ([]*contact.Contact, error)
+	CreateContactIntoGroup(groupID uuid.UUID, contacts ...*contact.Contact) ([]*contact.Contact, error)
 	AddContactToGroup(groupID, contactID uuid.UUID) error
 	DeleteContactFromGroup(groupID, contactID uuid.UUID) error
 }
