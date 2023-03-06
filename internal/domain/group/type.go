@@ -24,7 +24,7 @@ func NewWithID(
 	name name.Name,
 	description description.Description,
 	contactCount uint64,
-) *Group {
+) (*Group, error) {
 	return &Group{
 		id:           id,
 		createdAt:    createdAt.UTC(),
@@ -32,7 +32,7 @@ func NewWithID(
 		name:         name,
 		description:  description,
 		contactCount: contactCount,
-	}
+	}, nil
 }
 
 func New(name name.Name, description description.Description) *Group {
