@@ -1,20 +1,21 @@
 package postgres
 
 import (
-	"context"
 	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/evgeniy-dammer/clean-architecture/internal/domain/contact"
 	"github.com/evgeniy-dammer/clean-architecture/internal/repository/storage/postgres/dao"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/tools/transaction"
+	"github.com/evgeniy-dammer/clean-architecture/pkg/type/context"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 )
 
-func (r *Repository) CreateContactIntoGroup(groupID uuid.UUID, contacts ...*contact.Contact) ([]*contact.Contact, error) { //nolint:lll
-	ctx := context.Background()
+func (r *Repository) CreateContactIntoGroup(ctx context.Context, groupID uuid.UUID, contacts ...*contact.Contact) ([]*contact.Contact, error) { //nolint:lll
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -43,8 +44,9 @@ func (r *Repository) CreateContactIntoGroup(groupID uuid.UUID, contacts ...*cont
 	return response, nil
 }
 
-func (r *Repository) DeleteContactFromGroup(groupID, contactID uuid.UUID) error {
-	ctx := context.Background()
+func (r *Repository) DeleteContactFromGroup(ctx context.Context, groupID, contactID uuid.UUID) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -75,8 +77,9 @@ func (r *Repository) DeleteContactFromGroup(groupID, contactID uuid.UUID) error 
 	return nil
 }
 
-func (r *Repository) AddContactToGroup(groupID uuid.UUID, contactIDs ...uuid.UUID) error {
-	ctx := context.Background()
+func (r *Repository) AddContactToGroup(ctx context.Context, groupID uuid.UUID, contactIDs ...uuid.UUID) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {

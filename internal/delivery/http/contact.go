@@ -12,6 +12,7 @@ import (
 	"github.com/evgeniy-dammer/clean-architecture/internal/domain/contact/patronymic"
 	"github.com/evgeniy-dammer/clean-architecture/internal/domain/contact/surname"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/tools/converter"
+	"github.com/evgeniy-dammer/clean-architecture/pkg/type/context"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/pagination"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/phone"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/query"
@@ -42,38 +43,40 @@ var mappingSortsContact = query.SortsOptions{
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse			"404 Not Found"
 // @Router /contacts/ [post].
-func (d *Delivery) CreateContact(ctx *gin.Context) {
+func (d *Delivery) CreateContact(c *gin.Context) {
+	ctx := context.New(c)
+
 	contact := jsonContact.ShortContact{}
-	if err := ctx.ShouldBindJSON(&contact); err != nil {
-		SetError(ctx, http.StatusBadRequest, fmt.Errorf("payload is not correct, Error: %w", err))
+	if err := c.ShouldBindJSON(&contact); err != nil {
+		SetError(c, http.StatusBadRequest, fmt.Errorf("payload is not correct, Error: %w", err))
 
 		return
 	}
 
 	contactAge, err := age.New(uint64(contact.Age))
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	contactName, err := name.New(contact.Name)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	contactSurname, err := surname.New(contact.Surname)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	contactPatronymic, err := patronymic.New(contact.Patronymic)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
@@ -82,22 +85,22 @@ func (d *Delivery) CreateContact(ctx *gin.Context) {
 		*phone.New(contact.PhoneNumber), contact.Email, *contactName, *contactSurname, *contactPatronymic, *contactAge, contact.Gender, //nolint:lll
 	)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
-	response, err := d.ucContact.CreateContact(dContact)
+	response, err := d.ucContact.CreateContact(ctx, dContact)
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
 	if len(response) > 0 {
-		ctx.JSON(http.StatusCreated, jsonContact.ToContactResponse(response[0]))
+		c.JSON(http.StatusCreated, jsonContact.ToContactResponse(response[0]))
 	} else {
-		ctx.Status(http.StatusOK)
+		c.Status(http.StatusOK)
 	}
 }
 
@@ -114,45 +117,47 @@ func (d *Delivery) CreateContact(ctx *gin.Context) {
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse			  		  "404 Not Found"
 // @Router /contacts/{id} [put].
-func (d *Delivery) UpdateContact(ctx *gin.Context) {
+func (d *Delivery) UpdateContact(c *gin.Context) {
+	ctx := context.New(c)
+
 	var contactID jsonContact.ID
-	if err := ctx.ShouldBindUri(&contactID); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindUri(&contactID); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	contact := jsonContact.ShortContact{}
-	if err := ctx.ShouldBindJSON(&contact); err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+	if err := c.ShouldBindJSON(&contact); err != nil {
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
 	contactAge, err := age.New(uint64(contact.Age))
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	contactName, err := name.New(contact.Name)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	contactSurname, err := surname.New(contact.Surname)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	contactPatronymic, err := patronymic.New(contact.Patronymic)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
@@ -162,14 +167,14 @@ func (d *Delivery) UpdateContact(ctx *gin.Context) {
 		contact.Email, *contactName, *contactSurname, *contactPatronymic, *contactAge, contact.Gender,
 	)
 
-	response, err := d.ucContact.UpdateContact(dContact)
+	response, err := d.ucContact.UpdateContact(ctx, dContact)
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, jsonContact.ToContactResponse(response))
+	c.JSON(http.StatusOK, jsonContact.ToContactResponse(response))
 }
 
 // DeleteContact
@@ -183,22 +188,24 @@ func (d *Delivery) UpdateContact(ctx *gin.Context) {
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse			"404 Not Found"
 // @Router /contacts/{id} [delete].
-func (d *Delivery) DeleteContact(ctx *gin.Context) {
+func (d *Delivery) DeleteContact(c *gin.Context) {
+	ctx := context.New(c)
+
 	var contactID jsonContact.ID
 
-	if err := ctx.ShouldBindUri(&contactID); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindUri(&contactID); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
-	if err := d.ucContact.DeleteContact(converter.StringToUUID(contactID.Value)); err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+	if err := d.ucContact.DeleteContact(ctx, converter.StringToUUID(contactID.Value)); err != nil {
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	c.Status(http.StatusOK)
 }
 
 // ListContact
@@ -215,12 +222,14 @@ func (d *Delivery) DeleteContact(ctx *gin.Context) {
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse			"404 Not Found"
 // @Router /contacts/ [get].
-func (d *Delivery) ListContact(ctx *gin.Context) {
-	params, err := query.ParseQuery(ctx, query.Options{
+func (d *Delivery) ListContact(c *gin.Context) {
+	ctx := context.New(c)
+
+	params, err := query.ParseQuery(c, query.Options{
 		Sorts: mappingSortsContact,
 	})
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
@@ -233,16 +242,16 @@ func (d *Delivery) ListContact(ctx *gin.Context) {
 		},
 	}
 
-	contacts, err := d.ucContact.GetListContact(param)
+	contacts, err := d.ucContact.GetListContact(ctx, param)
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	count, err := d.ucContact.CountContact(param)
+	count, err := d.ucContact.CountContact(ctx, param)
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -258,7 +267,7 @@ func (d *Delivery) ListContact(ctx *gin.Context) {
 		result.List = append(result.List, jsonContact.ToContactResponse(value))
 	}
 
-	ctx.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, result)
 }
 
 // ReadContactByID
@@ -273,21 +282,23 @@ func (d *Delivery) ListContact(ctx *gin.Context) {
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse					  "404 Not Found"
 // @Router /contacts/{id} [get].
-func (d *Delivery) ReadContactByID(ctx *gin.Context) {
+func (d *Delivery) ReadContactByID(c *gin.Context) {
+	ctx := context.New(c)
+
 	var contactID jsonContact.ID
 
-	if err := ctx.ShouldBindUri(&contactID); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindUri(&contactID); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
-	response, err := d.ucContact.GetContactByID(converter.StringToUUID(contactID.Value))
+	response, err := d.ucContact.GetContactByID(ctx, converter.StringToUUID(contactID.Value))
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, jsonContact.ToContactResponse(response))
+	c.JSON(http.StatusOK, jsonContact.ToContactResponse(response))
 }

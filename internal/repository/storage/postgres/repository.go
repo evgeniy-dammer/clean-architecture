@@ -3,6 +3,7 @@ package postgres
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -19,6 +20,7 @@ type Repository struct {
 type Options struct {
 	DefaultLimit  uint64
 	DefaultOffset uint64
+	Timeout       time.Duration
 }
 
 func New(database *pgxpool.Pool, options Options) (*Repository, error) {

@@ -4,19 +4,21 @@ import (
 	"time"
 
 	"github.com/evgeniy-dammer/clean-architecture/internal/domain/contact"
+	"github.com/evgeniy-dammer/clean-architecture/pkg/type/context"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/queryparameter"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
-func (uc *UseCase) CreateContact(contacts ...*contact.Contact) ([]*contact.Contact, error) {
-	list, err := uc.adapterStorage.CreateContact(contacts...)
+func (uc *UseCase) CreateContact(ctx context.Context, contacts ...*contact.Contact) ([]*contact.Contact, error) {
+	list, err := uc.adapterStorage.CreateContact(ctx, contacts...)
 
 	return list, errors.Wrap(err, "create contact use case error")
 }
 
-func (uc *UseCase) UpdateContact(contactUpdate *contact.Contact) (*contact.Contact, error) {
+func (uc *UseCase) UpdateContact(ctx context.Context, contactUpdate *contact.Contact) (*contact.Contact, error) {
 	contact, err := uc.adapterStorage.UpdateContact(
+		ctx,
 		contactUpdate.ID(),
 		func(oldContact *contact.Contact) (*contact.Contact, error) {
 			contact, err := contact.NewWithID(
@@ -38,26 +40,26 @@ func (uc *UseCase) UpdateContact(contactUpdate *contact.Contact) (*contact.Conta
 	return contact, errors.Wrap(err, "update contact use case error")
 }
 
-func (uc *UseCase) DeleteContact(contactID uuid.UUID) error {
-	err := uc.adapterStorage.DeleteContact(contactID)
+func (uc *UseCase) DeleteContact(ctx context.Context, contactID uuid.UUID) error {
+	err := uc.adapterStorage.DeleteContact(ctx, contactID)
 
 	return errors.Wrap(err, "delete contact use case error")
 }
 
-func (uc *UseCase) GetListContact(parameter queryparameter.QueryParameter) ([]*contact.Contact, error) {
-	contacts, err := uc.adapterStorage.GetListContact(parameter)
+func (uc *UseCase) GetListContact(ctx context.Context, parameter queryparameter.QueryParameter) ([]*contact.Contact, error) {
+	contacts, err := uc.adapterStorage.GetListContact(ctx, parameter)
 
 	return contacts, errors.Wrap(err, "get contact list use case error")
 }
 
-func (uc *UseCase) GetContactByID(contactID uuid.UUID) (*contact.Contact, error) {
-	response, err := uc.adapterStorage.GetContactByID(contactID)
+func (uc *UseCase) GetContactByID(ctx context.Context, contactID uuid.UUID) (*contact.Contact, error) {
+	response, err := uc.adapterStorage.GetContactByID(ctx, contactID)
 
 	return response, errors.Wrap(err, "get contact by ID use case error")
 }
 
-func (uc *UseCase) CountContact(parameter queryparameter.QueryParameter) (uint64, error) {
-	count, err := uc.adapterStorage.CountContact(parameter)
+func (uc *UseCase) CountContact(ctx context.Context, parameter queryparameter.QueryParameter) (uint64, error) {
+	count, err := uc.adapterStorage.CountContact(ctx, parameter)
 
 	return count, errors.Wrap(err, "count contacts use case error")
 }

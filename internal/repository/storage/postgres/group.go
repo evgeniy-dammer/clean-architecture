@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"context"
 	"database/sql"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/evgeniy-dammer/clean-architecture/pkg/tools/converter"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/tools/transaction"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/columncode"
+	"github.com/evgeniy-dammer/clean-architecture/pkg/type/context"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/queryparameter"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
@@ -24,7 +24,10 @@ var mappingSortGroup = map[columncode.ColumnCode]string{
 	"description": "description",
 }
 
-func (r *Repository) CreateGroup(group *group.Group) (*group.Group, error) {
+func (r *Repository) CreateGroup(ctx context.Context, group *group.Group) (*group.Group, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	query, args, err := r.genSQL.Insert("clean.group").
 		Columns("id", "name", "description", "created_at", "modified_at").
 		Values(group.ID(), group.Name().Value(), group.Description().Value(), group.CreatedAt(), group.ModifiedAt()).
@@ -33,8 +36,6 @@ func (r *Repository) CreateGroup(group *group.Group) (*group.Group, error) {
 		return nil, errors.Wrap(err, "unable to build a query string")
 	}
 
-	ctx := context.Background()
-
 	if _, err = r.db.Exec(ctx, query, args...); err != nil {
 		return nil, errors.Wrap(err, "unable to execute query")
 	}
@@ -42,8 +43,9 @@ func (r *Repository) CreateGroup(group *group.Group) (*group.Group, error) {
 	return group, nil
 }
 
-func (r *Repository) UpdateGroup(groupID uuid.UUID, updateFn func(group *group.Group) (*group.Group, error)) (*group.Group, error) { //nolint:lll
-	ctx := context.Background()
+func (r *Repository) UpdateGroup(ctx context.Context, groupID uuid.UUID, updateFn func(group *group.Group) (*group.Group, error)) (*group.Group, error) { //nolint:lll
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -94,8 +96,9 @@ func (r *Repository) UpdateGroup(groupID uuid.UUID, updateFn func(group *group.G
 	return groupForUpdate, nil
 }
 
-func (r *Repository) DeleteGroup(groupID uuid.UUID) error {
-	ctx := context.Background()
+func (r *Repository) DeleteGroup(ctx context.Context, groupID uuid.UUID) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -156,8 +159,9 @@ func (r *Repository) clearGroupTx(ctx context.Context, trx pgx.Tx, groupID uuid.
 	return nil
 }
 
-func (r *Repository) GetListGroup(parameter queryparameter.QueryParameter) ([]*group.Group, error) {
-	ctx := context.Background()
+func (r *Repository) GetListGroup(ctx context.Context, parameter queryparameter.QueryParameter) ([]*group.Group, error) { //nolint:lll
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -223,8 +227,9 @@ func (r *Repository) listGroupTx(ctx context.Context, trx pgx.Tx, parameter quer
 	return result, nil
 }
 
-func (r *Repository) GetGroupByID(groupID uuid.UUID) (*group.Group, error) {
-	ctx := context.Background()
+func (r *Repository) GetGroupByID(ctx context.Context, groupID uuid.UUID) (*group.Group, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -271,8 +276,9 @@ func (r *Repository) oneGroupTx(ctx context.Context, trx pgx.Tx, groupID uuid.UU
 	return grp, errors.Wrap(err, "unable to create new group")
 }
 
-func (r *Repository) CountGroup(parameter queryparameter.QueryParameter) (uint64, error) {
-	ctx := context.Background()
+func (r *Repository) CountGroup(ctx context.Context, parameter queryparameter.QueryParameter) (uint64, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	builder := r.genSQL.Select("COUNT(id)").From("clean.group")
 

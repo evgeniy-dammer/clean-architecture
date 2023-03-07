@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"context"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -9,6 +8,7 @@ import (
 	"github.com/evgeniy-dammer/clean-architecture/internal/repository/storage/postgres/dao"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/tools/transaction"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/columncode"
+	"github.com/evgeniy-dammer/clean-architecture/pkg/type/context"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/queryparameter"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
@@ -28,8 +28,9 @@ var mappingSortContact = map[columncode.ColumnCode]string{
 	"age":         "age",
 }
 
-func (r *Repository) CreateContact(contacts ...*contact.Contact) ([]*contact.Contact, error) {
-	ctx := context.Background()
+func (r *Repository) CreateContact(ctx context.Context, contacts ...*contact.Contact) ([]*contact.Contact, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -61,8 +62,9 @@ func (r *Repository) createContactTx(ctx context.Context, tx pgx.Tx, contacts ..
 	return contacts, nil
 }
 
-func (r *Repository) UpdateContact(contactID uuid.UUID, updateFn func(c *contact.Contact) (*contact.Contact, error)) (*contact.Contact, error) { //nolint:lll
-	ctx := context.Background()
+func (r *Repository) UpdateContact(ctx context.Context, contactID uuid.UUID, updateFn func(c *contact.Contact) (*contact.Contact, error)) (*contact.Contact, error) { //nolint:lll
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -123,8 +125,9 @@ func (r *Repository) updateContactTx(ctx context.Context, trx pgx.Tx, input *con
 	return r.toDomainContact(daoContacts[0])
 }
 
-func (r *Repository) DeleteContact(contactID uuid.UUID) error {
-	ctx := context.Background()
+func (r *Repository) DeleteContact(ctx context.Context, contactID uuid.UUID) error {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -171,8 +174,9 @@ func (r *Repository) deleteContactTx(ctx context.Context, trx pgx.Tx, contactID 
 	return nil
 }
 
-func (r *Repository) GetListContact(parameter queryparameter.QueryParameter) ([]*contact.Contact, error) {
-	ctx := context.Background()
+func (r *Repository) GetListContact(ctx context.Context, parameter queryparameter.QueryParameter) ([]*contact.Contact, error) { //nolint:lll
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -234,8 +238,9 @@ func (r *Repository) listContactTx(ctx context.Context, trx pgx.Tx, parameter qu
 	return r.toDomainContacts(daoContacts)
 }
 
-func (r *Repository) GetContactByID(contactID uuid.UUID) (*contact.Contact, error) {
-	ctx := context.Background()
+func (r *Repository) GetContactByID(ctx context.Context, contactID uuid.UUID) (*contact.Contact, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -283,7 +288,10 @@ func (r *Repository) oneContactTx(ctx context.Context, trx pgx.Tx, contactID uui
 	return r.toDomainContact(daoContact[0])
 }
 
-func (r *Repository) CountContact(parameter queryparameter.QueryParameter) (uint64, error) {
+func (r *Repository) CountContact(ctx context.Context, parameter queryparameter.QueryParameter) (uint64, error) {
+	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+	defer ctx.Cancel()
+
 	builder := r.genSQL.Select("COUNT(id)").From("clean.contact")
 
 	builder = builder.Where(squirrel.Eq{"is_archived": false})
@@ -293,7 +301,7 @@ func (r *Repository) CountContact(parameter queryparameter.QueryParameter) (uint
 		return 0, errors.Wrap(err, "unable to build a query string")
 	}
 
-	row := r.db.QueryRow(context.Background(), query, args...)
+	row := r.db.QueryRow(ctx, query, args...)
 
 	var total uint64
 

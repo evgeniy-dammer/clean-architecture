@@ -12,6 +12,7 @@ import (
 	"github.com/evgeniy-dammer/clean-architecture/internal/domain/contact/patronymic"
 	"github.com/evgeniy-dammer/clean-architecture/internal/domain/contact/surname"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/tools/converter"
+	"github.com/evgeniy-dammer/clean-architecture/pkg/type/context"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/phone"
 	"github.com/gin-gonic/gin"
 )
@@ -30,45 +31,47 @@ import (
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse						"404 Not Found"
 // @Router /groups/{id}/contacts/ [post].
-func (d *Delivery) CreateContactIntoGroup(ctx *gin.Context) {
+func (d *Delivery) CreateContactIntoGroup(c *gin.Context) {
+	ctx := context.New(c)
+
 	var groupID jsonGroup.ID
-	if err := ctx.ShouldBindUri(&groupID); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindUri(&groupID); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	contact := jsonContact.ShortContact{}
-	if err := ctx.ShouldBindJSON(&contact); err != nil {
-		SetError(ctx, http.StatusBadRequest, fmt.Errorf("payload is not correct, Error: %w", err))
+	if err := c.ShouldBindJSON(&contact); err != nil {
+		SetError(c, http.StatusBadRequest, fmt.Errorf("payload is not correct, Error: %w", err))
 
 		return
 	}
 
 	contactAge, err := age.New(uint64(contact.Age))
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	contactName, err := name.New(contact.Name)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	contactSurname, err := surname.New(contact.Surname)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	contactPatronymic, err := patronymic.New(contact.Patronymic)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
@@ -83,14 +86,14 @@ func (d *Delivery) CreateContactIntoGroup(ctx *gin.Context) {
 		contact.Gender,
 	)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
-	contacts, err := d.ucGroup.CreateContactIntoGroup(converter.StringToUUID(groupID.Value), dContact)
+	contacts, err := d.ucGroup.CreateContactIntoGroup(ctx, converter.StringToUUID(groupID.Value), dContact)
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -101,7 +104,7 @@ func (d *Delivery) CreateContactIntoGroup(ctx *gin.Context) {
 		list = append(list, jsonContact.ToContactResponse(value))
 	}
 
-	ctx.JSON(http.StatusOK, list)
+	c.JSON(http.StatusOK, list)
 }
 
 // AddContactToGroup
@@ -117,28 +120,30 @@ func (d *Delivery) CreateContactIntoGroup(ctx *gin.Context) {
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse				"404 Not Found"
 // @Router /groups/{id}/contacts/{contactId} [post].
-func (d *Delivery) AddContactToGroup(ctx *gin.Context) {
+func (d *Delivery) AddContactToGroup(c *gin.Context) {
+	ctx := context.New(c)
+
 	var groupID jsonGroup.ID
-	if err := ctx.ShouldBindUri(&groupID); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindUri(&groupID); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	var contactID jsonGroup.ContactID
-	if err := ctx.ShouldBindUri(&contactID); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindUri(&contactID); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
-	if err := d.ucGroup.AddContactToGroup(converter.StringToUUID(groupID.Value), converter.StringToUUID(contactID.Value)); err != nil { //nolint:lll
-		SetError(ctx, http.StatusInternalServerError, err)
+	if err := d.ucGroup.AddContactToGroup(ctx, converter.StringToUUID(groupID.Value), converter.StringToUUID(contactID.Value)); err != nil { //nolint:lll
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	c.Status(http.StatusOK)
 }
 
 // DeleteContactFromGroup
@@ -154,26 +159,28 @@ func (d *Delivery) AddContactToGroup(ctx *gin.Context) {
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse			"404 Not Found"
 // @Router /groups/{id}/contacts/{contactId} [delete].
-func (d *Delivery) DeleteContactFromGroup(ctx *gin.Context) {
+func (d *Delivery) DeleteContactFromGroup(c *gin.Context) {
+	ctx := context.New(c)
+
 	var groupID jsonGroup.ID
-	if err := ctx.ShouldBindUri(&groupID); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindUri(&groupID); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	var contactID jsonGroup.ContactID
-	if err := ctx.ShouldBindUri(&contactID); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindUri(&contactID); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
-	if err := d.ucGroup.DeleteContactFromGroup(converter.StringToUUID(groupID.Value), converter.StringToUUID(contactID.Value)); err != nil { //nolint:lll
-		SetError(ctx, http.StatusInternalServerError, err)
+	if err := d.ucGroup.DeleteContactFromGroup(ctx, converter.StringToUUID(groupID.Value), converter.StringToUUID(contactID.Value)); err != nil { //nolint:lll
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	c.Status(http.StatusOK)
 }

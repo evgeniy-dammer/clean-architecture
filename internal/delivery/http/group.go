@@ -9,6 +9,7 @@ import (
 	"github.com/evgeniy-dammer/clean-architecture/internal/domain/group/description"
 	"github.com/evgeniy-dammer/clean-architecture/internal/domain/group/name"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/tools/converter"
+	"github.com/evgeniy-dammer/clean-architecture/pkg/type/context"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/pagination"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/query"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/queryparameter"
@@ -34,36 +35,38 @@ var mappingSortsGroup = query.SortsOptions{
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse					"404 Not Found"
 // @Router /groups/ [post].
-func (d *Delivery) CreateGroup(ctx *gin.Context) {
+func (d *Delivery) CreateGroup(c *gin.Context) {
+	ctx := context.New(c)
+
 	group := &jsonGroup.ShortGroup{}
-	if err := ctx.ShouldBindJSON(&group); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindJSON(&group); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	groupName, err := name.New(group.Name)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	groupDescription, err := description.New(group.Description)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
-	newGroup, err := d.ucGroup.CreateGroup(domainGroup.New(groupName, groupDescription))
+	newGroup, err := d.ucGroup.CreateGroup(ctx, domainGroup.New(groupName, groupDescription))
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, jsonGroup.ResponseGroup{
+	c.JSON(http.StatusOK, jsonGroup.ResponseGroup{
 		ID:         newGroup.ID().String(),
 		CreatedAt:  newGroup.CreatedAt(),
 		ModifiedAt: newGroup.ModifiedAt(),
@@ -90,31 +93,33 @@ func (d *Delivery) CreateGroup(ctx *gin.Context) {
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse					"404 Not Found"
 // @Router /groups/{id} [put].
-func (d *Delivery) UpdateGroup(ctx *gin.Context) {
+func (d *Delivery) UpdateGroup(c *gin.Context) {
+	ctx := context.New(c)
+
 	var groupID jsonGroup.ID
-	if err := ctx.ShouldBindUri(&groupID); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindUri(&groupID); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	group := jsonGroup.ShortGroup{}
-	if err := ctx.ShouldBindJSON(&group); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindJSON(&group); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	groupName, err := name.New(group.Name)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
 	groupDescription, err := description.New(group.Description)
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
@@ -123,19 +128,19 @@ func (d *Delivery) UpdateGroup(ctx *gin.Context) {
 		converter.StringToUUID(groupID.Value), time.Now().UTC(), time.Now().UTC(), groupName, groupDescription, 0,
 	)
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	response, err := d.ucGroup.UpdateGroup(grp)
+	response, err := d.ucGroup.UpdateGroup(ctx, grp)
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, jsonGroup.ProtoToGroupResponse(response))
+	c.JSON(http.StatusOK, jsonGroup.ProtoToGroupResponse(response))
 }
 
 // DeleteGroup
@@ -150,22 +155,24 @@ func (d *Delivery) UpdateGroup(ctx *gin.Context) {
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse			"404 Not Found"
 // @Router /groups/{id} [delete].
-func (d *Delivery) DeleteGroup(ctx *gin.Context) {
+func (d *Delivery) DeleteGroup(c *gin.Context) {
+	ctx := context.New(c)
+
 	var groupID jsonGroup.ID
 
-	if err := ctx.ShouldBindUri(&groupID); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindUri(&groupID); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
-	if err := d.ucGroup.DeleteGroup(converter.StringToUUID(groupID.Value)); err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+	if err := d.ucGroup.DeleteGroup(ctx, converter.StringToUUID(groupID.Value)); err != nil {
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	c.Status(http.StatusOK)
 }
 
 // ListGroup
@@ -182,10 +189,12 @@ func (d *Delivery) DeleteGroup(ctx *gin.Context) {
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse			"404 Not Found"
 // @Router /groups/ [get].
-func (d *Delivery) ListGroup(ctx *gin.Context) {
-	params, err := query.ParseQuery(ctx, query.Options{Sorts: mappingSortsGroup})
+func (d *Delivery) ListGroup(c *gin.Context) {
+	ctx := context.New(c)
+
+	params, err := query.ParseQuery(c, query.Options{Sorts: mappingSortsGroup})
 	if err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
@@ -198,16 +207,16 @@ func (d *Delivery) ListGroup(ctx *gin.Context) {
 		},
 	}
 
-	groups, err := d.ucGroup.GetListGroup(param)
+	groups, err := d.ucGroup.GetListGroup(ctx, param)
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	count, err := d.ucContact.CountContact(param)
+	count, err := d.ucContact.CountContact(ctx, param)
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
@@ -218,7 +227,7 @@ func (d *Delivery) ListGroup(ctx *gin.Context) {
 		list[i] = jsonGroup.ProtoToGroupResponse(elem)
 	}
 
-	ctx.JSON(http.StatusOK, jsonGroup.ListGroup{
+	c.JSON(http.StatusOK, jsonGroup.ListGroup{
 		Total:  count,
 		Limit:  params.Limit,
 		Offset: params.Offset,
@@ -238,20 +247,22 @@ func (d *Delivery) ListGroup(ctx *gin.Context) {
 // @Failure 403	 		"Forbidden"
 // @Failure 404 	    {object} 	ErrorResponse					"404 Not Found"
 // @Router /groups/{id} [get].
-func (d *Delivery) ReadGroupByID(ctx *gin.Context) {
+func (d *Delivery) ReadGroupByID(c *gin.Context) {
+	ctx := context.New(c)
+
 	var groupID jsonGroup.ID
-	if err := ctx.ShouldBindUri(&groupID); err != nil {
-		SetError(ctx, http.StatusBadRequest, err)
+	if err := c.ShouldBindUri(&groupID); err != nil {
+		SetError(c, http.StatusBadRequest, err)
 
 		return
 	}
 
-	response, err := d.ucGroup.GetGroupByID(converter.StringToUUID(groupID.Value))
+	response, err := d.ucGroup.GetGroupByID(ctx, converter.StringToUUID(groupID.Value))
 	if err != nil {
-		SetError(ctx, http.StatusInternalServerError, err)
+		SetError(c, http.StatusInternalServerError, err)
 
 		return
 	}
 
-	ctx.JSON(http.StatusOK, jsonGroup.ProtoToGroupResponse(response))
+	c.JSON(http.StatusOK, jsonGroup.ProtoToGroupResponse(response))
 }
