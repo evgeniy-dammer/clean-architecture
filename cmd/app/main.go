@@ -15,16 +15,21 @@ import (
 	"github.com/evgeniy-dammer/clean-architecture/pkg/store/postgres"
 	redisCache "github.com/evgeniy-dammer/clean-architecture/pkg/store/redis"
 	"github.com/go-redis/redis/v8"
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		panic(err)
+	}
+
 	conn, err := postgres.New(postgres.DBConfig{
 		Host:     "localhost",
 		Port:     5432,
-		Database: "",
-		User:     "",
-		Password: "",
+		Database: "clean",
+		User:     "clean",
+		Password: "clean",
 		SSLMode:  "disable",
 	})
 	if err != nil {
@@ -42,8 +47,12 @@ func main() {
 		panic(err)
 	}
 
+	repoStorage, err := postgresStorage.New(conn.Pool, postgresStorage.Options{})
+	if err != nil {
+		panic(err)
+	}
+
 	var (
-		repoStorage  = postgresStorage.New(conn.Pool, postgresStorage.Options{})
 		_            = redisStorage.New(cache, redisStorage.Options{})
 		ucContact    = useCaseContact.New(repoStorage, useCaseContact.Options{})
 		ucGroup      = useCaseGroup.New(repoStorage, useCaseGroup.Options{})

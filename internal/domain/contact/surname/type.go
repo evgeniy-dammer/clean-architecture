@@ -20,6 +20,6 @@ func New(surname string) (*Surname, error) {
 	return &s, nil
 }
 
-func (s *Surname) String() string {
-	return string(*s)
+func (s Surname) String() string {
+	return string(s)
 }

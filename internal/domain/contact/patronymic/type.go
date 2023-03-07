@@ -20,6 +20,6 @@ func New(patronymic string) (*Patronymic, error) {
 	return &p, nil
 }
 
-func (p *Patronymic) String() string {
-	return string(*p)
+func (p Patronymic) String() string {
+	return string(p)
 }

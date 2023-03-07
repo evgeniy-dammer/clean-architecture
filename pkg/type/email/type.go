@@ -31,7 +31,7 @@ func (e *Email) Email() Email {
 	return *e
 }
 
-func (e *Email) String() string {
+func (e Email) String() string {
 	return e.value
 }
 

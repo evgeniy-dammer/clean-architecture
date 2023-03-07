@@ -14,7 +14,7 @@ func New(phone string) *Phone {
 	}
 }
 
-func (p *Phone) String() string {
+func (p Phone) String() string {
 	return p.value
 }
 
