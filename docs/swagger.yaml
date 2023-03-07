@@ -1,0 +1,669 @@
+basePath: /
+definitions:
+  contact.ListContact:
+    properties:
+      limit:
+        default: 10
+        description: Limit of contacts in request
+        example: 10
+        minimum: 0
+        type: integer
+      list:
+        description: List of contacts
+        items:
+          $ref: '#/definitions/contact.ResponseContact'
+        type: array
+      offset:
+        default: 0
+        description: Offset by contacts
+        example: 20
+        minimum: 0
+        type: integer
+      total:
+        default: 0
+        description: Total contacts in system
+        example: 10
+        minimum: 0
+        type: integer
+    type: object
+  contact.ResponseContact:
+    properties:
+      age:
+        default: 0
+        description: Age
+        example: 42
+        maximum: 200
+        minimum: 0
+        type: integer
+      createdAt:
+        description: Create date
+        type: string
+      email:
+        description: Email
+        example: example@gmail.com
+        format: email
+        maxLength: 250
+        type: string
+      gender:
+        description: Gender
+        enum:
+        - 1
+        - 2
+        example: 1
+        type: integer
+      id:
+        description: Contact ID
+        example: 00000000-0000-0000-0000-000000000000
+        format: uuid
+        type: string
+      modifiedAt:
+        description: Update date
+        type: string
+      name:
+        description: Name
+        example: Иван
+        maxLength: 50
+        type: string
+      patronymic:
+        description: Patronymic
+        example: Иванович
+        maxLength: 100
+        type: string
+      phoneNumber:
+        description: Phone
+        example: "78002002020"
+        maxLength: 50
+        type: string
+      surname:
+        description: Surname
+        example: Иванов
+        maxLength: 100
+        type: string
+    required:
+    - createdAt
+    - id
+    - modifiedAt
+    - phoneNumber
+    type: object
+  contact.ShortContact:
+    properties:
+      age:
+        default: 0
+        description: Age
+        example: 42
+        maximum: 200
+        minimum: 0
+        type: integer
+      email:
+        description: Email
+        example: example@gmail.com
+        format: email
+        maxLength: 250
+        type: string
+      gender:
+        description: Gender
+        enum:
+        - 1
+        - 2
+        example: 1
+        type: integer
+      name:
+        description: Name
+        example: Иван
+        maxLength: 50
+        type: string
+      patronymic:
+        description: Patronymic
+        example: Иванович
+        maxLength: 100
+        type: string
+      phoneNumber:
+        description: Phone
+        example: "78002002020"
+        maxLength: 50
+        type: string
+      surname:
+        description: Surname
+        example: Иванов
+        maxLength: 100
+        type: string
+    required:
+    - phoneNumber
+    type: object
+  group.ListGroup:
+    properties:
+      limit:
+        default: 10
+        description: Limit of groups in request
+        example: 10
+        minimum: 0
+        type: integer
+      list:
+        description: List of groups
+        items:
+          $ref: '#/definitions/group.ResponseGroup'
+        minItems: 0
+        type: array
+      offset:
+        default: 0
+        description: Offset by groups
+        example: 20
+        minimum: 0
+        type: integer
+      total:
+        default: 0
+        description: Total groups in system
+        example: 10
+        minimum: 0
+        type: integer
+    type: object
+  group.ResponseGroup:
+    properties:
+      contactsAmount:
+        default: 10
+        description: Contacts count in group
+        minimum: 0
+        type: integer
+      createdAt:
+        description: Create date
+        type: string
+      description:
+        description: Group description
+        example: Описание группы
+        maxLength: 1000
+        type: string
+      id:
+        description: Group ID
+        example: 00000000-0000-0000-0000-000000000000
+        format: uuid
+        type: string
+      modifiedAt:
+        description: Update date
+        type: string
+      name:
+        description: Group name
+        example: Название группы
+        maxLength: 100
+        type: string
+    required:
+    - createdAt
+    - id
+    - modifiedAt
+    - name
+    type: object
+  group.ShortGroup:
+    properties:
+      description:
+        description: Group description
+        example: Описание группы
+        maxLength: 1000
+        type: string
+      name:
+        description: Group name
+        example: Название группы
+        maxLength: 100
+        type: string
+    required:
+    - name
+    type: object
+  http.ErrorResponse:
+    properties:
+      errors:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      info: {}
+      message:
+        type: string
+    type: object
+info:
+  contact:
+    email: evgeniydammer@gmail.com
+    name: API Support
+  description: contact service on clean architecture
+  title: contact service on clean architecture
+  version: "1.0"
+paths:
+  /contacts/:
+    get:
+      consumes:
+      - application/json
+      description: Get contact list method.
+      parameters:
+      - default: 10
+        description: Item count
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: item offset
+        in: query
+        name: offset
+        type: integer
+      - default: name
+        description: Field sort
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contact list
+          schema:
+            $ref: '#/definitions/contact.ListContact'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get contact list method.
+      tags:
+      - contacts
+    post:
+      consumes:
+      - application/json
+      description: Create contact method.
+      parameters:
+      - description: Contact data
+        in: body
+        name: contact
+        required: true
+        schema:
+          $ref: '#/definitions/contact.ShortContact'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "201":
+          description: Contact structure
+          schema:
+            $ref: '#/definitions/contact.ResponseContact'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Create contact method.
+      tags:
+      - contacts
+  /contacts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete contact method.
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Delete contact method.
+      tags:
+      - contacts
+    get:
+      consumes:
+      - application/json
+      description: Get contact by ID method.
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contact structure
+          schema:
+            $ref: '#/definitions/contact.ResponseContact'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get contact by ID method.
+      tags:
+      - contacts
+    put:
+      consumes:
+      - application/json
+      description: Update contact method.
+      parameters:
+      - description: Contact ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Contact data
+        in: body
+        name: contact
+        required: true
+        schema:
+          $ref: '#/definitions/contact.ShortContact'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contact structure
+          schema:
+            $ref: '#/definitions/contact.ResponseContact'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Update contact method.
+      tags:
+      - contacts
+  /groups/:
+    get:
+      consumes:
+      - application/json
+      description: Get group list method.
+      parameters:
+      - default: 10
+        description: Item count
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Item offset
+        in: query
+        name: offset
+        type: integer
+      - default: name
+        description: Field sort
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.ListGroup'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get group list method.
+      tags:
+      - groups
+    post:
+      consumes:
+      - application/json
+      description: Create group method.
+      parameters:
+      - description: Group data
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/group.ShortGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.ResponseGroup'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Create group method.
+      tags:
+      - groups
+  /groups/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete group method.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Delete group method.
+      tags:
+      - groups
+    get:
+      consumes:
+      - application/json
+      description: Get group by ID method.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.ResponseGroup'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get group by ID method.
+      tags:
+      - groups
+    put:
+      consumes:
+      - application/json
+      description: Update group method.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Group data
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/group.ShortGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.ResponseGroup'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Update group method.
+      tags:
+      - groups
+  /groups/{id}/contacts/:
+    post:
+      consumes:
+      - application/json
+      description: Create contact and add it into group.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Contact data
+        in: body
+        name: contact
+        required: true
+        schema:
+          $ref: '#/definitions/contact.ShortContact'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      security:
+      - Cookies: []
+      summary: Create contact and add it into group.
+      tags:
+      - groups
+  /groups/{id}/contacts/{contactId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove contact from group.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Contact ID
+        in: path
+        name: contactId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Remove contact from group.
+      tags:
+      - groups
+    post:
+      consumes:
+      - application/json
+      description: Add contact into group.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Contact ID
+        in: path
+        name: contactId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "403":
+          description: Forbidden
+        "404":
+          description: 404 Not Found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Add contact into group.
+      tags:
+      - groups
+swagger: "2.0"

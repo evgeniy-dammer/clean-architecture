@@ -14,7 +14,7 @@ lint:
 	gofumpt -w . && gci write --skip-generated -s standard,default . &&  golangci-lint run
 
 alignment:
-	fieldalignment -fix ./internal/delivery/grpc
+	fieldalignment -fix ./internal/delivery/http/contact
 
 migrcreate:
 	migrate create -ext sql -dir ./migrations -seq init
@@ -24,3 +24,6 @@ migrup:
 
 migrdown:
 	migrate -path ./migrations -database 'postgres://clean:${DB_PASSWORD}@localhost:5432/clean?sslmode=disable' down
+
+swagger:
+	swag init --parseDependency --generalInfo ./internal/delivery/http/delivery.go --output ./docs/
