@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	log "github.com/evgeniy-dammer/clean-architecture/pkg/type/logger"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -19,7 +20,7 @@ func (r *Repository) CreateContactIntoGroup(ctx context.Context, groupID uuid.UU
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to begin transaction")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to begin transaction")
 	}
 
 	defer func(ctx context.Context, t pgx.Tx) {
@@ -50,7 +51,7 @@ func (r *Repository) DeleteContactFromGroup(ctx context.Context, groupID, contac
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
-		return errors.Wrap(err, "unable to begin transaction")
+		return errors.Wrap(log.ErrorWithContext(ctx, err), "unable to begin transaction")
 	}
 
 	defer func(ctx context.Context, t pgx.Tx) {
@@ -62,12 +63,12 @@ func (r *Repository) DeleteContactFromGroup(ctx context.Context, groupID, contac
 		Where(squirrel.Eq{"contact_id": contactID, "group_id": groupID}).
 		ToSql()
 	if err != nil {
-		return errors.Wrap(err, "unable to build a query string")
+		return errors.Wrap(log.ErrorWithContext(ctx, err), "unable to build a query string")
 	}
 
 	_, err = trx.Exec(ctx, query, args...)
 	if err != nil {
-		return errors.Wrap(err, "unable to execute query")
+		return errors.Wrap(log.ErrorWithContext(ctx, err), "unable to execute query")
 	}
 
 	if err = r.updateGroupContactCount(ctx, trx, groupID); err != nil {
@@ -83,7 +84,7 @@ func (r *Repository) AddContactToGroup(ctx context.Context, groupID uuid.UUID, c
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
-		return errors.Wrap(err, "unable to begin transaction")
+		return errors.Wrap(log.ErrorWithContext(ctx, err), "unable to begin transaction")
 	}
 
 	defer func(ctx context.Context, t pgx.Tx) {
@@ -139,7 +140,7 @@ func (r *Repository) fillGroupTx(ctx context.Context, trx pgx.Tx, groupID uuid.U
 	)
 
 	if err != nil {
-		return errors.Wrap(err, "unable to copy")
+		return errors.Wrap(log.ErrorWithContext(ctx, err), "unable to copy")
 	}
 
 	if err = r.updateGroupContactCount(ctx, trx, groupID); err != nil {
@@ -165,19 +166,19 @@ func (r *Repository) checkExistContactInGroup(ctx context.Context, trx pgx.Tx, g
 		From("clean.contact_in_group").
 		Where(squirrel.Eq{"contact_id": contactIDs, "group_id": groupID}).ToSql()
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "unable to build a query string")
+		return nil, nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to build a query string")
 	}
 
 	rows, err := trx.Query(ctx, query, args...)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "unable to execute query")
+		return nil, nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to execute query")
 	}
 
 	for rows.Next() {
 		contactID := uuid.UUID{}
 
 		if err = rows.Scan(&contactID); err != nil {
-			return nil, nil, errors.Wrap(err, "unable to scan ID")
+			return nil, nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to scan ID")
 		}
 
 		listExist = append(listExist, contactID)
@@ -191,7 +192,7 @@ func (r *Repository) checkExistContactInGroup(ctx context.Context, trx pgx.Tx, g
 	}
 
 	if err = rows.Err(); err != nil {
-		return nil, nil, errors.Wrap(err, "errors occurred in rows")
+		return nil, nil, errors.Wrap(log.ErrorWithContext(ctx, err), "errors occurred in rows")
 	}
 
 	return listExist, mapExist, nil

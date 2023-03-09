@@ -9,6 +9,7 @@ import (
 	"github.com/evgeniy-dammer/clean-architecture/pkg/tools/transaction"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/columncode"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/context"
+	log "github.com/evgeniy-dammer/clean-architecture/pkg/type/logger"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/queryparameter"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
@@ -34,7 +35,7 @@ func (r *Repository) CreateContact(ctx context.Context, contacts ...*contact.Con
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to begin transaction")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to create contact")
 	}
 
 	defer func(ctx context.Context, t pgx.Tx) {
@@ -56,7 +57,7 @@ func (r *Repository) createContactTx(ctx context.Context, tx pgx.Tx, contacts ..
 
 	_, err := tx.CopyFrom(ctx, pgx.Identifier{"clean", "contact"}, dao.CreateColumnContact, r.toCopyFromSource(contacts...)) //nolint:lll
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to copy")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to copy")
 	}
 
 	return contacts, nil
@@ -68,7 +69,7 @@ func (r *Repository) UpdateContact(ctx context.Context, contactID uuid.UUID, upd
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to begin transaction")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to begin transaction")
 	}
 
 	defer func(ctx context.Context, t pgx.Tx) {
@@ -108,18 +109,18 @@ func (r *Repository) updateContactTx(ctx context.Context, trx pgx.Tx, input *con
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to build a query string")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to build a query string")
 	}
 
 	rows, err := trx.Query(ctx, query, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to execute a query")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to execute a query")
 	}
 
 	var daoContacts []*dao.Contact
 
 	if err = pgxscan.ScanAll(&daoContacts, rows); err != nil {
-		return nil, errors.Wrap(err, "unable to scan")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to scan")
 	}
 
 	return r.toDomainContact(daoContacts[0])
@@ -131,7 +132,7 @@ func (r *Repository) DeleteContact(ctx context.Context, contactID uuid.UUID) err
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
-		return errors.Wrap(err, "unable to begin transaction")
+		return errors.Wrap(log.ErrorWithContext(ctx, err), "unable to begin transaction")
 	}
 
 	defer func(ctx context.Context, t pgx.Tx) {
@@ -153,18 +154,18 @@ func (r *Repository) deleteContactTx(ctx context.Context, trx pgx.Tx, contactID 
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return errors.Wrap(err, "unable to build a query string")
+		return errors.Wrap(log.ErrorWithContext(ctx, err), "unable to build a query string")
 	}
 
 	rows, err := trx.Query(ctx, query, args...)
 	if err != nil {
-		return errors.Wrap(err, "unable to execute query")
+		return errors.Wrap(log.ErrorWithContext(ctx, err), "unable to execute query")
 	}
 
 	var daoContacts []*dao.Contact
 
 	if err = pgxscan.ScanAll(&daoContacts, rows); err != nil {
-		return errors.Wrap(err, "unable to scan")
+		return errors.Wrap(log.ErrorWithContext(ctx, err), "unable to scan")
 	}
 
 	if err = r.updateGroupsContactCountByFilters(ctx, trx, contactID); err != nil {
@@ -180,7 +181,7 @@ func (r *Repository) GetListContact(ctx context.Context, parameter queryparamete
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to begin transaction")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to begin transaction")
 	}
 
 	defer func(ctx context.Context, t pgx.Tx) {
@@ -221,18 +222,18 @@ func (r *Repository) listContactTx(ctx context.Context, trx pgx.Tx, parameter qu
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to build a query string")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to build a query string")
 	}
 
 	rows, err := trx.Query(ctx, query, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to execute a query")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to execute a query")
 	}
 
 	var daoContacts []*dao.Contact
 
 	if err = pgxscan.ScanAll(&daoContacts, rows); err != nil {
-		return nil, errors.Wrap(err, "unable to scan")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to scan")
 	}
 
 	return r.toDomainContacts(daoContacts)
@@ -244,7 +245,7 @@ func (r *Repository) GetContactByID(ctx context.Context, contactID uuid.UUID) (*
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to begin transaction")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to begin transaction")
 	}
 
 	defer func(ctx context.Context, t pgx.Tx) {
@@ -267,18 +268,18 @@ func (r *Repository) oneContactTx(ctx context.Context, trx pgx.Tx, contactID uui
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to build a query string")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to build a query string")
 	}
 
 	rows, err := trx.Query(ctx, query, args...)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to execute query")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to execute query")
 	}
 
 	var daoContact []*dao.Contact
 
 	if err = pgxscan.ScanAll(&daoContact, rows); err != nil {
-		return nil, errors.Wrap(err, "unable to scan")
+		return nil, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to scan")
 	}
 
 	if len(daoContact) == 0 {
@@ -298,7 +299,7 @@ func (r *Repository) CountContact(ctx context.Context, parameter queryparameter.
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return 0, errors.Wrap(err, "unable to build a query string")
+		return 0, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to build a query string")
 	}
 
 	row := r.db.QueryRow(ctx, query, args...)
@@ -306,7 +307,7 @@ func (r *Repository) CountContact(ctx context.Context, parameter queryparameter.
 	var total uint64
 
 	if err = row.Scan(&total); err != nil {
-		return 0, errors.Wrap(err, "unable to scan")
+		return 0, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to scan")
 	}
 
 	return total, nil
