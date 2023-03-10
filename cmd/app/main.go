@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,6 +14,9 @@ import (
 	useCaseGroup "github.com/evgeniy-dammer/clean-architecture/internal/usecase/group"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/store/postgres"
 	redisCache "github.com/evgeniy-dammer/clean-architecture/pkg/store/redis"
+	"github.com/evgeniy-dammer/clean-architecture/pkg/tracing"
+	"github.com/evgeniy-dammer/clean-architecture/pkg/type/context"
+	log "github.com/evgeniy-dammer/clean-architecture/pkg/type/logger"
 	"github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
@@ -47,6 +50,16 @@ func main() {
 		panic(err)
 	}
 
+	closer, err := tracing.New(context.Empty())
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		if err = closer.Close(); err != nil {
+			log.Error(err)
+		}
+	}()
+
 	repoStorage, err := postgresStorage.New(conn.Pool, postgresStorage.Options{})
 	if err != nil {
 		panic(err)
@@ -61,7 +74,7 @@ func main() {
 	)
 
 	go func() {
-		log.Printf("service started successfully on http port: %d", viper.GetUint("HTTP_PORT"))
+		fmt.Printf("service started successfully on http port: %d", viper.GetUint("HTTP_PORT"))
 
 		if err = listenerHTTP.Run(); err != nil {
 			panic(err)

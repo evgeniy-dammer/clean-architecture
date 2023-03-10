@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"database/sql"
-	log "github.com/evgeniy-dammer/clean-architecture/pkg/type/logger"
+	"github.com/opentracing/opentracing-go"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -12,6 +12,7 @@ import (
 	"github.com/evgeniy-dammer/clean-architecture/pkg/tools/transaction"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/columncode"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/context"
+	log "github.com/evgeniy-dammer/clean-architecture/pkg/type/logger"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/queryparameter"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
@@ -25,9 +26,14 @@ var mappingSortGroup = map[columncode.ColumnCode]string{
 	"description": "description",
 }
 
-func (r *Repository) CreateGroup(ctx context.Context, group *group.Group) (*group.Group, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CreateGroup(ctxg context.Context, group *group.Group) (*group.Group, error) {
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "CreateGroup")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	query, args, err := r.genSQL.Insert("clean.group").
 		Columns("id", "name", "description", "created_at", "modified_at").
@@ -44,9 +50,14 @@ func (r *Repository) CreateGroup(ctx context.Context, group *group.Group) (*grou
 	return group, nil
 }
 
-func (r *Repository) UpdateGroup(ctx context.Context, groupID uuid.UUID, updateFn func(group *group.Group) (*group.Group, error)) (*group.Group, error) { //nolint:lll
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) UpdateGroup(ctxg context.Context, groupID uuid.UUID, updateFn func(group *group.Group) (*group.Group, error)) (*group.Group, error) { //nolint:lll
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "UpdateGroup")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -97,9 +108,14 @@ func (r *Repository) UpdateGroup(ctx context.Context, groupID uuid.UUID, updateF
 	return groupForUpdate, nil
 }
 
-func (r *Repository) DeleteGroup(ctx context.Context, groupID uuid.UUID) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) DeleteGroup(ctxg context.Context, groupID uuid.UUID) error {
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "DeleteGroup")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -160,9 +176,14 @@ func (r *Repository) clearGroupTx(ctx context.Context, trx pgx.Tx, groupID uuid.
 	return nil
 }
 
-func (r *Repository) GetListGroup(ctx context.Context, parameter queryparameter.QueryParameter) ([]*group.Group, error) { //nolint:lll
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) GetListGroup(ctxg context.Context, parameter queryparameter.QueryParameter) ([]*group.Group, error) { //nolint:lll
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "GetListGroup")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -228,9 +249,14 @@ func (r *Repository) listGroupTx(ctx context.Context, trx pgx.Tx, parameter quer
 	return result, nil
 }
 
-func (r *Repository) GetGroupByID(ctx context.Context, groupID uuid.UUID) (*group.Group, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) GetGroupByID(ctxg context.Context, groupID uuid.UUID) (*group.Group, error) {
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "GetGroupByID")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -277,9 +303,14 @@ func (r *Repository) oneGroupTx(ctx context.Context, trx pgx.Tx, groupID uuid.UU
 	return grp, errors.Wrap(log.ErrorWithContext(ctx, err), "unable to create new group")
 }
 
-func (r *Repository) CountGroup(ctx context.Context, parameter queryparameter.QueryParameter) (uint64, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CountGroup(ctxg context.Context, parameter queryparameter.QueryParameter) (uint64, error) {
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "CountGroup")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	builder := r.genSQL.Select("COUNT(id)").From("clean.group")
 

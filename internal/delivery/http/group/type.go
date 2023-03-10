@@ -3,7 +3,7 @@ package group
 import "time"
 
 // ResponseGroup
-// Response group structure
+// Response group structure.
 type ResponseGroup struct {
 	// Group ID
 	ID string `json:"id" binding:"required,uuid" example:"00000000-0000-0000-0000-000000000000" format:"uuid"`
@@ -23,7 +23,7 @@ type Group struct {
 }
 
 // ShortGroup
-// Short group structure
+// Short group structure.
 type ShortGroup struct {
 	// Group name
 	Name string `json:"name" binding:"required,max=100" example:"Название группы" maxLength:"100"`

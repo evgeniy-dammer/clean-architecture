@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	docs "github.com/evgeniy-dammer/clean-architecture/docs"
+	"github.com/evgeniy-dammer/clean-architecture/pkg/type/logger"
+	"github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	swaggerFiles "github.com/swaggo/files"
@@ -23,6 +25,12 @@ func (d *Delivery) initRouter() *gin.Engine {
 	}
 
 	router := gin.New()
+
+	router.Use(Tracer())
+
+	// Logs all panic to error log
+	//   - stack means whether output the stack info.
+	router.Use(ginzap.RecoveryWithZap(logger.GetLogger(), true))
 
 	d.routerDocs(router.Group("/docs"))
 

@@ -14,6 +14,7 @@ import (
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
 
@@ -29,9 +30,14 @@ var mappingSortContact = map[columncode.ColumnCode]string{
 	"age":         "age",
 }
 
-func (r *Repository) CreateContact(ctx context.Context, contacts ...*contact.Contact) ([]*contact.Contact, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CreateContact(ctxg context.Context, contacts ...*contact.Contact) ([]*contact.Contact, error) {
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "CreateContact")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -63,9 +69,14 @@ func (r *Repository) createContactTx(ctx context.Context, tx pgx.Tx, contacts ..
 	return contacts, nil
 }
 
-func (r *Repository) UpdateContact(ctx context.Context, contactID uuid.UUID, updateFn func(c *contact.Contact) (*contact.Contact, error)) (*contact.Contact, error) { //nolint:lll
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) UpdateContact(ctxg context.Context, contactID uuid.UUID, updateFn func(c *contact.Contact) (*contact.Contact, error)) (*contact.Contact, error) { //nolint:lll
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "UpdateContact")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -126,9 +137,14 @@ func (r *Repository) updateContactTx(ctx context.Context, trx pgx.Tx, input *con
 	return r.toDomainContact(daoContacts[0])
 }
 
-func (r *Repository) DeleteContact(ctx context.Context, contactID uuid.UUID) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) DeleteContact(ctxg context.Context, contactID uuid.UUID) error {
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "DeleteContact")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -175,9 +191,14 @@ func (r *Repository) deleteContactTx(ctx context.Context, trx pgx.Tx, contactID 
 	return nil
 }
 
-func (r *Repository) GetListContact(ctx context.Context, parameter queryparameter.QueryParameter) ([]*contact.Contact, error) { //nolint:lll
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) GetListContact(ctxg context.Context, parameter queryparameter.QueryParameter) ([]*contact.Contact, error) { //nolint:lll
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "GetListContact")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -239,9 +260,14 @@ func (r *Repository) listContactTx(ctx context.Context, trx pgx.Tx, parameter qu
 	return r.toDomainContacts(daoContacts)
 }
 
-func (r *Repository) GetContactByID(ctx context.Context, contactID uuid.UUID) (*contact.Contact, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) GetContactByID(ctxg context.Context, contactID uuid.UUID) (*contact.Contact, error) {
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "GetContactByID")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -289,9 +315,14 @@ func (r *Repository) oneContactTx(ctx context.Context, trx pgx.Tx, contactID uui
 	return r.toDomainContact(daoContact[0])
 }
 
-func (r *Repository) CountContact(ctx context.Context, parameter queryparameter.QueryParameter) (uint64, error) {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CountContact(ctxg context.Context, parameter queryparameter.QueryParameter) (uint64, error) {
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "CountContact")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	builder := r.genSQL.Select("COUNT(id)").From("clean.contact")
 

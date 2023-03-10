@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/georgysavva/scany v1.2.1
+	github.com/gin-contrib/zap v0.1.0
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-redis/cache/v8 v8.4.4
 	github.com/go-redis/redis/v8 v8.11.5
@@ -12,18 +13,21 @@ require (
 	github.com/jackc/pgx/v4 v4.18.1
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.7
+	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose v2.7.0+incompatible
 	github.com/spf13/viper v1.15.0
 	github.com/swaggo/files v1.0.0
 	github.com/swaggo/gin-swagger v1.3.2
 	github.com/swaggo/swag v1.7.9
+	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
 )
 
 require (
+	github.com/HdrHistogram/hdrhistogram-go v1.1.2 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -71,10 +75,13 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
+	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
 	github.com/vmihailenco/go-tinylfu v0.2.2 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.4 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+	go.opentelemetry.io/otel v1.10.0 // indirect
+	go.opentelemetry.io/otel/trace v1.10.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect

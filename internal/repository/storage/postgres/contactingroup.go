@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	log "github.com/evgeniy-dammer/clean-architecture/pkg/type/logger"
+	"github.com/opentracing/opentracing-go"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -9,14 +9,20 @@ import (
 	"github.com/evgeniy-dammer/clean-architecture/internal/repository/storage/postgres/dao"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/tools/transaction"
 	"github.com/evgeniy-dammer/clean-architecture/pkg/type/context"
+	log "github.com/evgeniy-dammer/clean-architecture/pkg/type/logger"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 	"github.com/pkg/errors"
 )
 
-func (r *Repository) CreateContactIntoGroup(ctx context.Context, groupID uuid.UUID, contacts ...*contact.Contact) ([]*contact.Contact, error) { //nolint:lll
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) CreateContactIntoGroup(ctxg context.Context, groupID uuid.UUID, contacts ...*contact.Contact) ([]*contact.Contact, error) { //nolint:lll
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "CreateContactIntoGroup")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -45,9 +51,14 @@ func (r *Repository) CreateContactIntoGroup(ctx context.Context, groupID uuid.UU
 	return response, nil
 }
 
-func (r *Repository) DeleteContactFromGroup(ctx context.Context, groupID, contactID uuid.UUID) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) DeleteContactFromGroup(ctxg context.Context, groupID, contactID uuid.UUID) error {
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "DeleteContactFromGroup")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -78,9 +89,14 @@ func (r *Repository) DeleteContactFromGroup(ctx context.Context, groupID, contac
 	return nil
 }
 
-func (r *Repository) AddContactToGroup(ctx context.Context, groupID uuid.UUID, contactIDs ...uuid.UUID) error {
-	ctx = ctx.CopyWithTimeout(r.options.Timeout)
+func (r *Repository) AddContactToGroup(ctxg context.Context, groupID uuid.UUID, contactIDs ...uuid.UUID) error {
+	ctx := ctxg.CopyWithTimeout(r.options.Timeout)
 	defer ctx.Cancel()
+
+	span, ctxt := opentracing.StartSpanFromContext(ctxg, "AddContactToGroup")
+	defer span.Finish()
+
+	ctx = context.New(ctxt)
 
 	trx, err := r.db.Begin(ctx)
 	if err != nil {

@@ -12,7 +12,7 @@ type ID struct {
 }
 
 // ResponseContact
-// Contact response structure
+// Contact response structure.
 type ResponseContact struct {
 	// Contact ID
 	ID string `json:"id" binding:"required,uuid" example:"00000000-0000-0000-0000-000000000000" format:"uuid"`
@@ -24,7 +24,7 @@ type ResponseContact struct {
 }
 
 // ShortContact
-// Short contact structure
+// Short contact structure.
 type ShortContact struct {
 	// Phone
 	PhoneNumber string `json:"phoneNumber" binding:"required,max=50" maxLength:"50" example:"78002002020"`
@@ -43,7 +43,7 @@ type ShortContact struct {
 }
 
 // ListContact
-// Contact list structure
+// Contact list structure.
 type ListContact struct {
 	// List of contacts
 	List []*ResponseContact `json:"list"`
