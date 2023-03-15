@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"database/sql"
-	"github.com/opentracing/opentracing-go"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -17,6 +16,7 @@ import (
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
 

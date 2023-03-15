@@ -19,21 +19,21 @@ func SetError(ctx *gin.Context, statusCode int, errs ...error) {
 	response := ErrorResponse{
 		ID: uuid.New(),
 	}
-	
+
 	if len(errs) == 0 {
 		return
 	}
-	
+
 	if len(errs) > 0 {
 		response.Error = errs[0].Error()
-		
+
 		if len(errs) > 1 {
 			for _, err := range errs {
 				response.Errors = append(response.Errors, err.Error())
 			}
 		}
 	}
-	
+
 	ctx.JSON(statusCode, response)
 }
 
@@ -46,12 +46,12 @@ func getContextFields(ctx *gin.Context) []zap.Field {
 		zap.String("ip", ctx.ClientIP()),
 		zap.String("user-agent", ctx.Request.UserAgent()),
 	}
-	
+
 	if span := opentracing.SpanFromContext(ctx.Request.Context()); span != nil {
 		if jaegerSpan, ok := span.Context().(jaeger.SpanContext); ok {
 			fields = append(fields, zap.Stringer("traceID", jaegerSpan.TraceID()))
 		}
 	}
-	
+
 	return fields
 }

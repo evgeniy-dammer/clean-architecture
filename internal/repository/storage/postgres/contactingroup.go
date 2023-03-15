@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"github.com/opentracing/opentracing-go"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -12,6 +11,7 @@ import (
 	log "github.com/evgeniy-dammer/clean-architecture/pkg/type/logger"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
+	"github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
 )
 
