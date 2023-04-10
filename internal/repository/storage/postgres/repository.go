@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"time"
-
+	
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
@@ -27,14 +27,14 @@ func New(database *pgxpool.Pool, options Options) (*Repository, error) {
 	if err := migrations(database); err != nil {
 		return nil, err
 	}
-
+	
 	r := &Repository{
 		genSQL: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 		db:     database,
 	}
-
+	
 	r.SetOptions(options)
-
+	
 	return r, nil
 }
 
@@ -49,20 +49,20 @@ func migrations(pool *pgxpool.Pool) (err error) {
 	if err != nil {
 		return errors.Wrap(err, "unable to open database with driver")
 	}
-
+	
 	defer func() {
 		if errClose := database.Close(); errClose != nil {
 			err = errClose
-
+			
 			return
 		}
 	}()
-
+	
 	goose.SetTableName("contact_version")
-
+	
 	if err = goose.Run("up", database, os.Getenv("MIGRATIONS_DIR")); err != nil {
 		return fmt.Errorf("goose %s error : %w", "up", err)
 	}
-
+	
 	return
 }
